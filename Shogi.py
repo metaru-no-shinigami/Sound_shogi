@@ -178,6 +178,7 @@ def promote(piece):
     if piece[0] in promotion:
         prompt = wn.textinput("Promotion", "Promote?(Y or N)")
         if prompt.upper() == "Y":
+            playsound.playsound(path + '\Promotion.mp3')
             name = piece[0]
             new_name = "Pro " + name
             del piece[0]
