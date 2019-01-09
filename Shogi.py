@@ -178,7 +178,7 @@ def promote(piece):
     if piece[0] in promotion:
         prompt = wn.textinput("Promotion", "Promote?(Y or N)")
         if prompt.upper() == "Y":
-            playsound.playsound(path + '\Promotion.mp3')
+            playsound.playsound(path + '\Promotion.mp3')                            #Play promotion sound
             name = piece[0]
             new_name = "Pro " + name
             del piece[0]
@@ -226,7 +226,7 @@ def death(piece, turn_counted):
         active_player = 2
     inactive_player_list.remove(piece)
     turtle_name = piece[3]
-    playsound.playsound(path + '\Punch.mp3')
+    playsound.playsound(path + '\Punch.mp3')                                          #Play punch sound
     turtle_name.clear()
     for test_spot in range(21):
         if done != 1:
@@ -317,7 +317,7 @@ def move(u, v):
         temp_move_list.clear()
         highlighter.clear()
         turtle_name.clear()
-        playsound.playsound(path + '\Move.mp3')
+        playsound.playsound(path + '\Move.mp3')                                             #play moving sound
         turtle_name.setpos(x, y)
         turtle_name.color("black")
         turtle_name.write(selected[0] + "\n", align="center", font=("Arial", 7, "bold"))
