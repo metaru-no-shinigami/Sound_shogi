@@ -1,5 +1,6 @@
 import turtle
 import math
+import time
 
 
 # Figure out if we should do a bunch of spacing or not
@@ -69,36 +70,40 @@ def mid():
 
 
 def flip():
-    for piece_1 in player_one:
-        turtle_controller = piece_1[3]
+    player_one_temp = player_one[:]
+    player_two_temp = player_two[:]
+    for piece_1 in player_one_temp:
+        turtle_controller_1 = piece_1[3]
         x = -piece_1[1]
         y = -piece_1[2]
         wn.tracer(0,0)
-        player_one.remove(turtle_controller)
+        turtle_controller_1.setpos(x, y)
+        turtle_controller_1.right(180)
+        turtle_controller_1.clear()
+        turtle_controller_1.write(piece_1[0])
+        player_one.remove(piece_1)
         del piece_1[1]
         piece_1.insert(1, x)
         del piece_1[2]
         piece_1.insert(2, y)
         player_one.append(piece_1)
-        turtle_controller.setpos(x, y)
-        turtle_controller.right(180)
-        turtle_controller.write(piece_1[0])
-        wn.tracer(1,5)
-    for piece_2 in player_two:
+
+    for piece_2 in player_two_temp:
         turtle_controller = piece_2[3]
         x = -piece_2[1]
         y = -piece_2[2]
         wn.tracer(0, 0)
-        player_two.remove(turtle_controller)
+        turtle_controller.setpos(x, y)
+        turtle_controller.right(180)
+        turtle_controller.clear()
+        turtle_controller.write(piece_2[0])
+        player_two.remove(piece_2)
         del piece_2[1]
         piece_2.insert(1, x)
         del piece_2[2]
         piece_2.insert(2, y)
         player_two.append(piece_2)
-        turtle_controller.setpos(x, y)
-        turtle_controller.right(180)
-        turtle_controller.write(piece_2[0])
-        wn.tracer(1, 5)
+    wn.tracer(1, 5)
     wn.update()
 
 
@@ -311,6 +316,9 @@ def move(u, v):
         turtle_name.setpos(x, y)
         turtle_name.color("black")
         turtle_name.write(selected[0] + "\n", align="center", font=("Arial", 7, "bold"))
+        time.sleep(5.0)
+        # wn.textinput("Switching Phase", "Press Enter When Ready")
+        flip()
         turn_counter += 1
         wn.onclick(select)
 
