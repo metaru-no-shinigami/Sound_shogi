@@ -1,6 +1,8 @@
 import turtle
 import math
 import time
+import playsound
+
 
 
 # Figure out if we should do a bunch of spacing or not
@@ -223,6 +225,7 @@ def death(piece, turn_counted):
         active_player = 2
     inactive_player_list.remove(piece)
     turtle_name = piece[3]
+    playsound.playsound(path + '\Punch.mp3')
     turtle_name.clear()
     for test_spot in range(21):
         if done != 1:
@@ -313,6 +316,7 @@ def move(u, v):
         temp_move_list.clear()
         highlighter.clear()
         turtle_name.clear()
+        playsound.playsound(path + '\Move.mp3')
         turtle_name.setpos(x, y)
         turtle_name.color("black")
         turtle_name.write(selected[0] + "\n", align="center", font=("Arial", 7, "bold"))
@@ -367,6 +371,8 @@ def select(x, y):
         highlighter.clear()
         wn.onclick(select)
 
+
+path = 'H:\Grade. 11\Computer Science\Final Project\Sounds'
 
 player_one = [['Pawn', -200, -100, turtle.Turtle()], ['Pawn', -150, -100, turtle.Turtle()],
               ['Pawn', -100, -100, turtle.Turtle()], ['Pawn', -50, -100, turtle.Turtle()],
