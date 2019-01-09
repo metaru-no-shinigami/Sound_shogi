@@ -163,7 +163,7 @@ def check_or_mate(turn_counted):
     elif turn_counted % 2 == 0:
         active_player_list = player_two
         inactive_player_list = player_one
-    for king_finder in
+    # for king_finder in
     for enemy_piece in active_player_list:
         kill_zone += legal_move(enemy_piece, turn_counted, 0)
 
