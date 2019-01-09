@@ -107,11 +107,11 @@ def flip():
     wn.update()
 
 
-def legal_move(piece, turn_counted):
-    global temp_move_list
+def legal_move(piece, turn_counted, highlight_bool):
     restrict = 0
     active_player_list = []
     inactive_player_list = []
+    temp_move_list = []
     if turn_counted % 2 != 0:
         active_player_list = player_one
         inactive_player_list = player_two
@@ -144,10 +144,29 @@ def legal_move(piece, turn_counted):
                                 if hit == 1:
                                     color = "red"
                                     fail = 1
-                                highlight_space(x + piece[1], y + piece[2], color)
+                                if highlight_bool == 1:
+                                    highlight_space(x + piece[1], y + piece[2], color)
                                 temp_move_list.append([x + piece[1], y + piece[2]])
     else:
         temp_move_list = middle[:]
+    return temp_move_list
+
+
+def check_or_mate(turn_counted):
+    active_player_list = []
+    inactive_player_list = []
+    kill_zone = []
+    king = ''
+    if turn_counted % 2 != 0:
+        active_player_list = player_one
+        inactive_player_list = player_two
+    elif turn_counted % 2 == 0:
+        active_player_list = player_two
+        inactive_player_list = player_one
+    for king_finder in
+    for enemy_piece in active_player_list:
+        kill_zone += legal_move(enemy_piece, turn_counted, 0)
+
 
 
 # This function highlights a square of your choice to display valid moves.
@@ -175,6 +194,9 @@ def highlight_space(x, y, color):
 def promote(piece):
     if piece[0] in promotion:
         prompt = wn.textinput("Promotion", "Promote?(Y or N)")
+        if type(prompt) == 'NoneType':
+            while type(prompt) == 'NoneType':
+                prompt = wn.textinput("Promotion", "Promote?(Y or N)")
         if prompt.upper() == "Y":
             name = piece[0]
             new_name = "Pro " + name
@@ -262,6 +284,7 @@ def move(u, v):
     inactive_player_dead = []
     selected = order_selected[len(order_selected) - 1]
     turtle_name = selected[3]
+    temp_move_list = selection_order_temp_move_list[len(selection_order_temp_move_list) -1]
 
     if x == "na" and y == "na":
         fail = 1
@@ -316,14 +339,14 @@ def move(u, v):
         turtle_name.setpos(x, y)
         turtle_name.color("black")
         turtle_name.write(selected[0] + "\n", align="center", font=("Arial", 7, "bold"))
-        time.sleep(5.0)
-        # wn.textinput("Switching Phase", "Press Enter When Ready")
+
+        # time.sleep(2.0)
+        wn.textinput("Switching Phase", "Press Enter When Ready")
         flip()
         turn_counter += 1
         wn.onclick(select)
 
     else:
-        temp_move_list.clear()
         highlighter.clear()
         turtle_name.color("black")
         wn.onclick(select)
@@ -335,6 +358,7 @@ def select(x, y):
     fail = 1
     active_player_list = []
     inactive_player_dead = []
+    temp_move_list = []
 
     if turn_counter % 2 != 0:
         active_player_list = player_one
@@ -359,11 +383,11 @@ def select(x, y):
         turtle_ref = selected[3]
         turtle_ref.color("blue")
         order_selected.append(selected)
-        legal_move(selected, turn_counter)
+        temp_move_list = legal_move(selected, turn_counter, 1)
+        selection_order_temp_move_list.append(temp_move_list)
         wn.onclick(move)
 
     else:
-        temp_move_list.clear()
         highlighter.clear()
         wn.onclick(select)
 
@@ -426,7 +450,7 @@ movement_rules = [['Pawn', [(0, 50)]],
                    [(0, -50), (0, -100), (0, -150), (0, -200), (0, -250), (0, -300), (0, -350), (0, -400)], [(50, 50)],
                    [(50, -50)], [(-50, 50)], [(-50, -50)]]]
 
-temp_move_list = []
+selection_order_temp_move_list = []
 promotion = ["Pawn", "Knight", "Lance", "Bishop", "Rook"]
 order_selected = []
 middle = mid()
