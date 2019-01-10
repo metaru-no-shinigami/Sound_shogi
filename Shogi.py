@@ -82,7 +82,7 @@ def flip():
         turtle_controller_1.setpos(x, y)
         turtle_controller_1.right(180)
         turtle_controller_1.clear()
-        turtle_controller_1.write(piece_1[0])
+        turtle_controller_1.write(piece_1[0] + "\n", align="center", font=("Arial", 7, "bold"))
         player_one.remove(piece_1)
         del piece_1[1]
         piece_1.insert(1, x)
@@ -98,7 +98,7 @@ def flip():
         turtle_controller.setpos(x, y)
         turtle_controller.right(180)
         turtle_controller.clear()
-        turtle_controller.write(piece_2[0])
+        turtle_controller.write(piece_2[0] + "\n", align="center", font=("Arial", 7, "bold"))
         player_two.remove(piece_2)
         del piece_2[1]
         piece_2.insert(1, x)
@@ -114,6 +114,7 @@ def legal_move(piece, turn_counted, highlight_bool):
     active_player_list = []
     inactive_player_list = []
     temp_move_list = []
+    kill_zone = []
     if turn_counted % 2 != 0:
         active_player_list = player_one
         inactive_player_list = player_two
@@ -126,6 +127,10 @@ def legal_move(piece, turn_counted, highlight_bool):
             restrict = 1
     if restrict == 1:
         piece_name = piece[0]
+        if piece_name == "King" and highlight_bool == 1:
+            kill_zone = []
+            for enemy_piece in inactive_player_list:
+                kill_zone += legal_move(enemy_piece, turn_counted, 0)
         for rule in movement_rules:
             if piece_name == rule[0]:
                 move_list = rule[1:len(rule)]
@@ -139,6 +144,10 @@ def legal_move(piece, turn_counted, highlight_bool):
                             for part in active_player_list:
                                 if x + piece[1] == part[1] and y + piece[2] == part[2]:
                                     fail = 1
+                            if piece[0] == "King" and highlight_bool == 1:
+                                for dead_space in kill_zone:
+                                    if (x + piece[1], y + piece[2]) == dead_space:
+                                        fail = 1
                             for part_2 in inactive_player_list:
                                 if x + piece[1] == part_2[1] and y + piece[2] == part_2[2]:
                                     hit = 1
@@ -158,17 +167,27 @@ def check_or_mate(turn_counted):
     active_player_list = []
     inactive_player_list = []
     kill_zone = []
-    king = ''
+    king = []
+    check = 0
     if turn_counted % 2 != 0:
         active_player_list = player_one
         inactive_player_list = player_two
     elif turn_counted % 2 == 0:
         active_player_list = player_two
         inactive_player_list = player_one
-    # for king_finder in
+    for king_finder in inactive_player_list:
+        if king_finder[0] == "King":
+            king = king_finder
     for enemy_piece in active_player_list:
         kill_zone += legal_move(enemy_piece, turn_counted, 0)
-
+    king_danger.append(kill_zone)
+    if (king[1], king[2]) in kill_zone:
+        wn.textinput("Check", "Press Enter")
+    if check == 1:
+        king_movement = legal_move(king, turn_counted, 0)
+        if king_movement == []:
+            wn.textinput("Checkmate!", "You win!")
+            return "end"
 
 
 # This function highlights a square of your choice to display valid moves.
@@ -196,15 +215,16 @@ def highlight_space(x, y, color):
 def promote(piece):
     if piece[0] in promotion:
         prompt = wn.textinput("Promotion", "Promote?(Y or N)")
-        if type(prompt) == 'NoneType':
-            while type(prompt) == 'NoneType':
-                prompt = wn.textinput("Promotion", "Promote?(Y or N)")
+        while type(prompt) is None:
+            prompt = wn.textinput("Promotion", "Promote?(Y or N)")
         if prompt.upper() == "Y":
-            playsound.playsound(path + '\Promotion.mp3')                            #Play promotion sound
+            # playsound.playsound(path + '\Promotion.mp3')                            #Play promotion sound
             name = piece[0]
             new_name = "Pro " + name
             del piece[0]
             piece.insert(0, new_name)
+            return piece
+        elif prompt.upper() == "N":
             return piece
     else:
         return piece
@@ -248,7 +268,7 @@ def death(piece, turn_counted):
         active_player = 2
     inactive_player_list.remove(piece)
     turtle_name = piece[3]
-    playsound.playsound(path + '\Punch.mp3')                                          #Play punch sound
+    #playsound.playsound(path + '\Punch.mp3')                                          #Play punch sound
     turtle_name.clear()
     for test_spot in range(21):
         if done != 1:
@@ -340,16 +360,16 @@ def move(u, v):
         temp_move_list.clear()
         highlighter.clear()
         turtle_name.clear()
-        playsound.playsound(path + '\Move.mp3')                                             #play moving sound
+        # playsound.playsound(path + '\Move.mp3')                                             #play moving sound
         turtle_name.setpos(x, y)
         turtle_name.color("black")
         turtle_name.write(selected[0] + "\n", align="center", font=("Arial", 7, "bold"))
-
-        # time.sleep(2.0)
-        wn.textinput("Switching Phase", "Press Enter When Ready")
-        flip()
-        turn_counter += 1
-        wn.onclick(select)
+        check = check_or_mate(turn_counter)
+        if check != "end":
+            wn.textinput("Switching Phase", "Press Enter When Ready")
+            flip()
+            turn_counter += 1
+            wn.onclick(select)
 
     else:
         highlighter.clear()
@@ -460,6 +480,7 @@ movement_rules = [['Pawn', [(0, 50)]],
 selection_order_temp_move_list = []
 promotion = ["Pawn", "Knight", "Lance", "Bishop", "Rook"]
 order_selected = []
+king_danger = []
 middle = mid()
 turn_counter = 1
 
