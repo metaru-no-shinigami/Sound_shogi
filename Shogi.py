@@ -417,7 +417,7 @@ def select(x, y):
         wn.onclick(select)
 
 
-path = 'H:\Grade. 11\Computer Science\Final Project\Sounds'
+path = 'Sounds'
 
 player_one = [['Pawn', -200, -100, turtle.Turtle()], ['Pawn', -150, -100, turtle.Turtle()],
               ['Pawn', -100, -100, turtle.Turtle()], ['Pawn', -50, -100, turtle.Turtle()],
