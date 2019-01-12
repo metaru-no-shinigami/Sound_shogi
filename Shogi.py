@@ -1,8 +1,6 @@
 import turtle
 import math
-import time
 import playsound
-
 
 
 # Figure out if we should do a bunch of spacing or not
@@ -78,7 +76,7 @@ def flip():
         turtle_controller_1 = piece_1[3]
         x = -piece_1[1]
         y = -piece_1[2]
-        wn.tracer(0,0)
+        wn.tracer(0, 0)
         turtle_controller_1.setpos(x, y)
         turtle_controller_1.right(180)
         turtle_controller_1.clear()
@@ -114,7 +112,9 @@ def legal_move(piece, turn_counted, highlight_bool):
     active_player_list = []
     inactive_player_list = []
     temp_move_list = []
-    kill_zone = []
+    dead_space = []
+    move_list = []
+    lane = death_parade[len(death_parade) - 1]
     if turn_counted % 2 != 0:
         active_player_list = player_one
         inactive_player_list = player_two
@@ -127,48 +127,71 @@ def legal_move(piece, turn_counted, highlight_bool):
             restrict = 1
     if restrict == 1:
         piece_name = piece[0]
-        if piece_name == "King" and highlight_bool == 1:
-            kill_zone = []
-            for enemy_piece in inactive_player_list:
-                kill_zone += legal_move(enemy_piece, turn_counted, 0)
         for rule in movement_rules:
             if piece_name == rule[0]:
                 move_list = rule[1:len(rule)]
-                for location in move_list:
-                    fail = 0
-                    hit = 0
-                    color = "blue"
-                    for cord in location:
-                        (x, y) = cord
-                        if fail == 0 and [x + piece[1], y + piece[2]] in middle:
-                            for part in active_player_list:
-                                if x + piece[1] == part[1] and y + piece[2] == part[2]:
-                                    fail = 1
-                            if piece[0] == "King" and highlight_bool == 1:
-                                for dead_space in kill_zone:
-                                    if (x + piece[1], y + piece[2]) == dead_space:
-                                        fail = 1
-                            for part_2 in inactive_player_list:
-                                if x + piece[1] == part_2[1] and y + piece[2] == part_2[2]:
-                                    hit = 1
-                            if fail == 0:
-                                if hit == 1:
-                                    color = "red"
-                                    fail = 1
-                                if highlight_bool == 1:
-                                    highlight_space(x + piece[1], y + piece[2], color)
-                                temp_move_list.append([x + piece[1], y + piece[2]])
+        move_path = [[-piece[1], -piece[2]]]
+        for location in move_list:
+            fail = 0
+            hit = 0
+            color = "blue"
+
+            for cord in location:
+                (x, y) = cord
+                if fail == 0 and [x + piece[1], y + piece[2]] in middle:
+                    for part in active_player_list:
+                        if x + piece[1] == part[1] and y + piece[2] == part[2]:
+                            if highlight_bool == 0:
+                                hit = 1
+                            else:
+                                fail = 1
+                    for part_2 in inactive_player_list:
+                        if x + piece[1] == part_2[1] and y + piece[2] == part_2[2]:
+                            if highlight_bool == 0 and part_2[0] == "King":
+                                fail = 1
+                                check.append("true")
+                                dead_space += move_path
+                                death_parade.append(dead_space)
+                            else:
+                                hit = 1
+                    if highlight_bool == 1:
+                        state = check[len(check) - 1]
+                        check.append("false")
+                        selected = piece[:]
+                        active_player_list.remove(piece)
+                        del selected[1]
+                        selected.insert(1, x + piece[1])
+                        del selected[2]
+                        selected.insert(2, y + piece[2])
+                        active_player_list.append(selected)
+                        check_or_mate(turn_counted + 1, 1)
+                        active_player_list.remove(selected)
+                        active_player_list.append(piece)
+                        if check[len(check) - 1] == "true":
+                            if state == "false":
+                                fail = 1
+                            check.append(state)
+                    if check[len(check) - 1] == "true" and not [x + piece[1],
+                                                                y + piece[2]] in lane and piece_name != "King":
+                        fail = 1
+                    if fail == 0:
+                        if hit == 1:
+                            color = "red"
+                            fail = 1
+                        if highlight_bool == 1:
+                            highlight_space(x + piece[1], y + piece[2], color)
+                        temp_move_list.append([x + piece[1], y + piece[2]])
+                        move_path.append([-x - piece[1], -y - piece[2]])
+
     else:
         temp_move_list = middle[:]
     return temp_move_list
 
 
-def check_or_mate(turn_counted):
+def check_or_mate(turn_counted, check_bool):
     active_player_list = []
     inactive_player_list = []
-    kill_zone = []
     king = []
-    check = 0
     if turn_counted % 2 != 0:
         active_player_list = player_one
         inactive_player_list = player_two
@@ -179,15 +202,14 @@ def check_or_mate(turn_counted):
         if king_finder[0] == "King":
             king = king_finder
     for enemy_piece in active_player_list:
-        kill_zone += legal_move(enemy_piece, turn_counted, 0)
-    king_danger.append(kill_zone)
-    if (king[1], king[2]) in kill_zone:
-        wn.textinput("Check", "Press Enter")
-    if check == 1:
+        legal_move(enemy_piece, turn_counted, 0)
+    if check[len(check) - 1] == "true" and check_bool == 0:
         king_movement = legal_move(king, turn_counted, 0)
-        if king_movement == []:
+        if len(king_movement) == 0:
             wn.textinput("Checkmate!", "You win!")
             return "end"
+        else:
+            wn.textinput("Check", "Press Enter")
 
 
 # This function highlights a square of your choice to display valid moves.
@@ -218,7 +240,7 @@ def promote(piece):
         while type(prompt) is None:
             prompt = wn.textinput("Promotion", "Promote?(Y or N)")
         if prompt.upper() == "Y":
-            playsound.playsound(path + '\Promotion.mp3')                            #Play promotion sound
+            # playsound.playsound(path + '\Promotion.mp3')                            #Play promotion sound
             name = piece[0]
             new_name = "Pro " + name
             del piece[0]
@@ -268,7 +290,7 @@ def death(piece, turn_counted):
         active_player = 2
     inactive_player_list.remove(piece)
     turtle_name = piece[3]
-    playsound.playsound(path + '\Punch.mp3')                                          #Play punch sound
+    # playsound.playsound(path + '\Punch.mp3')                                          #Play punch sound
     turtle_name.clear()
     for test_spot in range(21):
         if done != 1:
@@ -308,7 +330,7 @@ def move(u, v):
     inactive_player_dead = []
     selected = order_selected[len(order_selected) - 1]
     turtle_name = selected[3]
-    temp_move_list = selection_order_temp_move_list[len(selection_order_temp_move_list) -1]
+    temp_move_list = selection_order_temp_move_list[len(selection_order_temp_move_list) - 1]
 
     if x == "na" and y == "na":
         fail = 1
@@ -357,15 +379,16 @@ def move(u, v):
         if y + 200 >= 300 and returned != 1:
             selected = promote(selected)
         active_player_list.append(selected)
-        temp_move_list.clear()
         highlighter.clear()
         turtle_name.clear()
-        playsound.playsound(path + '\Move.mp3')                                             #play moving sound
+        # playsound.playsound(path + '\Move.mp3')                                             #play moving sound
         turtle_name.setpos(x, y)
         turtle_name.color("black")
         turtle_name.write(selected[0] + "\n", align="center", font=("Arial", 7, "bold"))
-        check = check_or_mate(turn_counter)
-        if check != "end":
+        if check[len(check) - 1] == "true":
+            check.append("false")
+        checkmate = check_or_mate(turn_counter, 0)
+        if checkmate != "end":
             wn.textinput("Switching Phase", "Press Enter When Ready")
             flip()
             turn_counter += 1
@@ -481,6 +504,8 @@ selection_order_temp_move_list = []
 promotion = ["Pawn", "Knight", "Lance", "Bishop", "Rook"]
 order_selected = []
 king_danger = []
+check = ["false"]
+death_parade = [[]]
 middle = mid()
 turn_counter = 1
 
