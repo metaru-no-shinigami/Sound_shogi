@@ -127,6 +127,7 @@ def legal_move(piece, turn_counted, highlight_bool, check_bool):
     inactive_player_list = []
     temp_move_list = []
     move_list = []
+    dead_space = 0
     if turn_counted % 2 != 0:
         active_player_list = player_one
         inactive_player_list = player_two
@@ -159,12 +160,13 @@ def legal_move(piece, turn_counted, highlight_bool, check_bool):
                     for part_2 in inactive_player_list:
                         if (-1) ** check_bool * x + piece[1] == part_2[1] and (-1) ** check_bool * y + piece[
                              2] == part_2[2]:
-                            if check_bool == 1 and part_2[0] == "King":
+                            if highlight_bool == 0 and part_2[0] == "King":
                                 fail = 1
                                 check.append("true")
                             else:
                                 hit = 1
                     if highlight_bool == 1:
+                        dead_space = 0
                         state = check[len(check) - 1]
                         check.append("false")
                         selected = piece[:]
@@ -185,9 +187,9 @@ def legal_move(piece, turn_counted, highlight_bool, check_bool):
                         active_player_list.remove(selected)
                         active_player_list.append(piece)
                         if check[len(check) - 1] == "true":
-                            fail = 1
+                            dead_space = 1
                         check.append(state)
-                    if fail == 0:
+                    if fail == 0 and dead_space == 0:
                         if hit == 1:
                             color = "red"
                             fail = 1
@@ -418,7 +420,6 @@ def select(x, y):
     fail = 1
     active_player_list = []
     inactive_player_dead = []
-
     if turn_counter % 2 != 0:
         active_player_list = player_one
         inactive_player_dead = player_two_dead
