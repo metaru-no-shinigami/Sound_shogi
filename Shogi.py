@@ -162,12 +162,14 @@ def legal_move(piece, turn_counted, highlight_bool, check_bool):
                              2] == part_2[2]:
                             if highlight_bool == 0 and part_2[0] == "King":
                                 fail = 1
+                                check.clear()
                                 check.append("true")
                             else:
                                 hit = 1
                     if highlight_bool == 1:
                         dead_space = 0
                         state = check[len(check) - 1]
+                        check.clear()
                         check.append("false")
                         selected = piece[:]
                         active_player_list.remove(piece)
@@ -188,7 +190,9 @@ def legal_move(piece, turn_counted, highlight_bool, check_bool):
                         active_player_list.append(piece)
                         if check[len(check) - 1] == "true":
                             dead_space = 1
+                        check.clear()
                         check.append(state)
+
                     if fail == 0 and dead_space == 0:
                         if hit == 1:
                             color = "red"
@@ -251,10 +255,10 @@ def highlight_space(x, y, color):
 def promote(piece):
     if piece[0] in promotion:
         prompt = wn.textinput("Promotion", "Promote?(Y or N)")
-        while not prompt.upper() == 'Y' or prompt.upper() == 'N':
+        while not bool(prompt == 'Y' or prompt == 'y') != bool(prompt == 'N' or prompt == 'n'):
             prompt = wn.textinput("Promotion", "Promote?(Y or N)")
         if prompt.upper() == "Y":
-            playsound.playsound('Sounds\Promotion.mp3')  # Play promotion sound
+            playsound.playsound('Sounds\Gong.mp3')  # Play promotion sound
             name = piece[0]
             new_name = "Pro " + name
             del piece[0]
@@ -400,6 +404,7 @@ def move(u, v):
         turtle_name.color("black")
         turtle_name.write(selected[0] + "\n", align="center", font=("Arial", 7, "bold"))
         if check[len(check) - 1] == "true":
+            check.pop()
             check.append("false")
         checkmate = check_or_mate(turn_counter, 0)
         if checkmate != "end":
@@ -521,6 +526,22 @@ turn_counter = 1
 
 wn = turtle.Screen()
 wn.title("Shogi")
+wn.register_shape("shogi_interior.gif")
+wn.register_shape("Sakura_wood.gif")
+wn.register_shape("Left_grave.gif")
+wn.register_shape("Right_grave.gif")
+board_background = turtle.Turtle()
+board_background.shape("shogi_interior.gif")
+grid_background = turtle.Turtle()
+grid_background.shape("Sakura_wood.gif")
+grave_background = turtle.Turtle()
+grave_background.penup()
+grave_background.setpos(-325, 0)
+grave_background.shape("Left_grave.gif")
+grave_background1 = turtle.Turtle()
+grave_background1.penup()
+grave_background1.setpos(325, 0)
+grave_background1.shape("Right_grave.gif")
 make_board()
 make_yards()
 wn.register_shape("tri", ((10, -3), (10, -12), (-10, -12), (-10, -3), (-5, 10), (5, 10)))
